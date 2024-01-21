@@ -48,6 +48,60 @@ class FigurePicture : public QWidget {
   }
 };
 
+class FigureGraphicsScene : public QWidget {
+ public:
+  FigureGraphicsScene(QWidget *p = nullptr) : QWidget(p) {}
+  void paintEvent(QPaintEvent *e) {
+    QGraphicsScene scene;
+    scene.setSceneRect(0, 0, 160, 120);
+    QGraphicsRectItem *rect = new QGraphicsRectItem(10, 20, 130, 100);
+    scene.addItem(rect);
+    QGraphicsView view(&scene);
+    view.setGeometry(0, 0, 130, 100);
+    QPainter widgetPaint(this);
+    scene.render(&widgetPaint, QRectF(0, 0, 130, 100));
+  }
+};
+
+class FigureOpenGLWidget : public QOpenGLWidget, protected QOpenGLFunctions {
+ public:
+  FigureOpenGLWidget(QWidget *p = nullptr) : QOpenGLWidget(p) {}
+  void initializeGL() {
+    initializeOpenGLFunctions();
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+  }
+  void resizeGL(int w, int h) { glViewport(0, 0, w, h); }
+  void paintGL() {
+    glClear(GL_COLOR_BUFFER_BIT);
+    glColor3f(0.0f, 0.0f, 0.0f);
+    float width = 0.6f, height = 0.4f;
+
+    // Нижняя грань
+    glBegin(GL_LINE_LOOP);
+    glVertex2f(-width, -height);
+    glVertex2f(width, -height);
+    glEnd();
+
+    // Верхняя грань
+    glBegin(GL_LINE_LOOP);
+    glVertex2f(-width, height);
+    glVertex2f(width, height);
+    glEnd();
+
+    // Левая грань
+    glBegin(GL_LINE_LOOP);
+    glVertex2f(-width, -height);
+    glVertex2f(-width, height);
+    glEnd();
+
+    // Правая грань
+    glBegin(GL_LINE_LOOP);
+    glVertex2f(width, -height);
+    glVertex2f(width, height);
+    glEnd();
+  }
+};
+
 int main(int argc, char *argv[]) {
   QApplication app(argc, argv);
   QWidget window;
@@ -67,6 +121,12 @@ int main(int argc, char *argv[]) {
   QLabel *textPicture = new QLabel("QPicture");
   textPicture->setFixedSize(180, 20);
   nameLayout.addWidget(textPicture);
+  QLabel *textGraphicsScene = new QLabel("QGraphicsScene");
+  textGraphicsScene->setFixedSize(180, 20);
+  nameLayout.addWidget(textGraphicsScene);
+  QLabel *textOpenGLWidget = new QLabel("QOpenGLWidget");
+  textOpenGLWidget->setFixedSize(180, 20);
+  nameLayout.addWidget(textOpenGLWidget);
 
   QHBoxLayout layout;
   FigureWidget *widget = new FigureWidget;
@@ -77,12 +137,15 @@ int main(int argc, char *argv[]) {
   layout.addWidget(pixmap);
   FigurePicture *picture = new FigurePicture;
   layout.addWidget(picture);
+  FigureGraphicsScene *graphicsScene = new FigureGraphicsScene;
+  layout.addWidget(graphicsScene);
+  FigureOpenGLWidget *openGlWidget = new FigureOpenGLWidget;
+  layout.addWidget(openGlWidget);
   window.setWindowTitle("test task");
 
   QVBoxLayout mainLayout(&window);
   mainLayout.addLayout(&nameLayout);
   mainLayout.addLayout(&layout);
-
 
   window.show();
   return app.exec();
